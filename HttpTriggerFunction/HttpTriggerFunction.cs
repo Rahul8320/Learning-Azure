@@ -7,14 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace HttpTrigger.Function
 {
-    public class HttpTriggerFunction
+    public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
     {
-        private readonly ILogger<HttpTriggerFunction> _logger;
-
-        public HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<HttpTriggerFunction> _logger = logger;
 
         [Function("HttpTriggerFunction")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
