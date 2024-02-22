@@ -5,35 +5,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace HttpTrigger.Function
+namespace HttpTriggerFunction;
+
+public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
 {
-    public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
+    private readonly ILogger<HttpTriggerFunction> _logger = logger;
+
+    [Function("HttpTriggerFunction")]
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
     {
-        private readonly ILogger<HttpTriggerFunction> _logger = logger;
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        [Function("HttpTriggerFunction")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+        string? name = req.Query["name"];
+
+        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+        if (!string.IsNullOrEmpty(requestBody))
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            var data = JsonSerializer.Deserialize<NameRequestModel>(requestBody);
 
-            string? name = req.Query["name"];
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-
-            if (!string.IsNullOrEmpty(requestBody))
-            {
-                var data = JsonSerializer.Deserialize<NameRequestModel>(requestBody);
-
-                name = string.IsNullOrEmpty(data?.Name) ? name : data?.Name;
-            }
-
-
-            if (string.IsNullOrEmpty(name))
-            {
-                return new BadRequestObjectResult("Please pass a name on the query string or in the request body");
-            }
-
-            return new OkObjectResult($"Hello, {name}");
+            name = string.IsNullOrEmpty(data?.Name) ? name : data?.Name;
         }
+
+
+        if (string.IsNullOrEmpty(name))
+        {
+            return new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+        }
+
+        return new OkObjectResult($"Hello, {name}");
     }
 }
