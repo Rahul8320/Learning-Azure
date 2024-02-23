@@ -27,17 +27,23 @@ public class ReceiverFunction(ILogger<ReceiverFunction> logger, IBlobStorageServ
                 return new BadRequestObjectResult("Name query parameter is missing or value is null.");
             }
 
-            // Get the pdf file from request body
-            Stream pdfStream = req.Body;
-
             // Check if file is exists or not
-            if (pdfStream == null)
+            if (req.ContentType == null || req.Form == null || req.Form.Files.Count == 0)
             {
-                return new BadRequestObjectResult("Please attach a PDF file in the request body.");
+                return new BadRequestObjectResult("Please attach a PDF file in the request.");
+            }
+
+            // Get the pdf file from request body
+            var file = req.Form.Files[0];
+
+            // Check if the file is a PDF
+            if (file.ContentType != "application/pdf")
+            {
+                return new BadRequestObjectResult($"Unsupported file type {file.ContentType}. Only Pdf file is Supported.");
             }
 
             // Upload the pdf file to the blob
-            Uri blobUri = await _blobStorageService.UploadPdfIntoBlobContainer(name, pdfStream);
+            Uri blobUri = await _blobStorageService.UploadPdfIntoBlobContainer(name, file);
 
             return new OkObjectResult($"File uploaded successfully. Blob URI: {blobUri}");
         }

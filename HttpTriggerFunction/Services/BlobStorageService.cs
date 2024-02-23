@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using HttpTriggerFunction.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace HttpTriggerFunction.Services;
@@ -37,7 +38,7 @@ public class BlobStorageService : IBlobStorageService
         }
     }
 
-    public async Task<Uri> UploadPdfIntoBlobContainer(string name, Stream pdfStream)
+    public async Task<Uri> UploadPdfIntoBlobContainer(string name, IFormFile pdfFile)
     {
         try
         {
@@ -52,7 +53,11 @@ public class BlobStorageService : IBlobStorageService
 
             // Upload the pdf file to the blob
             BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
-            await blobClient.UploadAsync(pdfStream, true);
+
+            using (Stream pdfStream = pdfFile.OpenReadStream())
+            {
+                await blobClient.UploadAsync(pdfStream, true);
+            }
 
             // Log the blob file uri
             _logger.LogInformation($"File uploaded to blob storage. Blob URL: {blobClient.Uri}");
