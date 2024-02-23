@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace HttpTriggerFunction;
+namespace HttpTriggerFunction.Functions;
 
 public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
 {
