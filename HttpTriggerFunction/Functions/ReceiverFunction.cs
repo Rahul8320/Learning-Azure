@@ -36,9 +36,8 @@ public class ReceiverFunction(ILogger<ReceiverFunction> logger)
             }
 
             // Save the pdf file to Azure Blob Storage
-            // string connectionString = "http://127.0.0.1:10000/devstoreaccount1";
-            string connectionString = "UseDevelopmentStorage=true;";
-            string containerName = "pdf-storage";
+            string connectionString = System.Environment.GetEnvironmentVariable("BlobStorageConnectionString", EnvironmentVariableTarget.Process)!;
+            string containerName = System.Environment.GetEnvironmentVariable("BlobContainerName", EnvironmentVariableTarget.Process)!;
 
             BlobServiceClient blobServiceClient = new(connectionString);
             BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);

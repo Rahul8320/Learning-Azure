@@ -20,6 +20,9 @@ public class MyHttpTriggerFunction(ILogger<MyHttpTriggerFunction> logger)
 
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
+        // Get environment variables.
+        _logger.LogInformation($"FUNCTIONS_WORKER_RUNTIME: {System.Environment.GetEnvironmentVariable("FUNCTIONS_WORKER_RUNTIME", EnvironmentVariableTarget.Process)}");
+
         if (!string.IsNullOrEmpty(requestBody))
         {
             var data = JsonSerializer.Deserialize<NameRequestModel>(requestBody);
