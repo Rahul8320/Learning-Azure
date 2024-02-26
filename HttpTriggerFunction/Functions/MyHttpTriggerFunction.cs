@@ -12,7 +12,7 @@ public class MyHttpTriggerFunction(ILogger<MyHttpTriggerFunction> logger)
     private readonly ILogger<MyHttpTriggerFunction> _logger = logger;
 
     [Function("MyHttpTriggerFunction")]
-    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+    public async Task<MultiResponse> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
     {
         _logger.LogInformation("My Custom HTTP trigger function processed a request.");
 
@@ -33,9 +33,17 @@ public class MyHttpTriggerFunction(ILogger<MyHttpTriggerFunction> logger)
 
         if (string.IsNullOrEmpty(name))
         {
-            return new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+            return new MultiResponse
+            {
+                Result = new BadRequestObjectResult("Please pass a name on the query string or in the request body"),
+                Messages = ["MyHttpTriggerFunction Response", "Please pass a name on the query string or in the request body"]
+            };
         }
 
-        return new OkObjectResult($"Welcome back, {name}. Now you can get the access code.");
+        return new MultiResponse
+        {
+            Result = new OkObjectResult($"Welcome back, {name}. Now you can get the access code."),
+            Messages = ["MyHttpTriggerFunction Response", $"Welcome back, {name}. Now you can get the access code."]
+        };
     }
 }
