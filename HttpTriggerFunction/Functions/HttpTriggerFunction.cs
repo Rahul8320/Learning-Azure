@@ -23,4 +23,18 @@ public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
 
         return response;
     }
+
+    [Function("CurrentTime")]
+    public async Task<HttpResponseData> CurrentTime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "current-time-utc")] HttpRequestData req)
+    {
+        _logger.LogInformation("'CurrentTime' function processed a request.");
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(new
+        {
+            CurrentTimeUtc = DateTime.UtcNow
+        });
+
+        return response;
+    }
 }
