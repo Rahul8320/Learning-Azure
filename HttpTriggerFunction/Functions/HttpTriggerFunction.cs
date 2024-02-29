@@ -1,8 +1,6 @@
-using System.Text.Json;
-using HttpTriggerFunction.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
 namespace HttpTriggerFunction.Functions;
@@ -11,28 +9,18 @@ public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
 {
     private readonly ILogger<HttpTriggerFunction> _logger = logger;
 
-    [Function("HttpTriggerFunction")]
-    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+    [Function("HttpFunction")]
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "walkthrough")] HttpRequestData req)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
+        _logger.LogInformation("'HTTPFunction' function processed a request.");
 
-        string? name = req.Query["name"];
-
-        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-
-        if (!string.IsNullOrEmpty(requestBody))
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(new
         {
-            var data = JsonSerializer.Deserialize<NameRequestModel>(requestBody);
+            Name = "Azure Function",
+            CurrentTime = DateTime.UtcNow
+        });
 
-            name = string.IsNullOrEmpty(data?.Name) ? name : data?.Name;
-        }
-
-
-        if (string.IsNullOrEmpty(name))
-        {
-            return new BadRequestObjectResult("Please pass a name on the query string or in the request body");
-        }
-
-        return new OkObjectResult($"Hello, {name}");
+        return response;
     }
 }

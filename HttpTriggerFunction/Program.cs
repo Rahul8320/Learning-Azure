@@ -3,9 +3,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using HttpTriggerFunction.Services.IServices;
 using HttpTriggerFunction.Services;
+using HttpTriggerFunction.Middlewares;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
+    .ConfigureFunctionsWebApplication(builder =>
+    {
+        builder.UseMiddleware<ExceptionHandlingMiddleware>();
+    })
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
