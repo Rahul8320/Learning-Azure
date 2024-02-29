@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -25,16 +26,13 @@ public class HttpTriggerFunction(ILogger<HttpTriggerFunction> logger)
     }
 
     [Function("CurrentTime")]
-    public async Task<HttpResponseData> CurrentTime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "current-time-utc")] HttpRequestData req)
+    [BlobOutput("pdf-storage/{name}-output.txt")]
+    public string CurrentTime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "current-time-utc")] HttpRequest req)
     {
         _logger.LogInformation("'CurrentTime' function processed a request.");
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new
-        {
-            CurrentTimeUtc = DateTime.UtcNow
-        });
+        string name = req.Query["name"].ToString();
 
-        return response;
+        return DateTime.UtcNow.ToString();
     }
 }

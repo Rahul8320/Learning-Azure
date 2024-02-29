@@ -12,11 +12,12 @@ public class ProcessFunction(ILogger<ProcessFunction> logger)
         [BlobTrigger("pdf-storage/{name}",
         Connection = "BlobStorageConnectionString")]
         Stream stream,
-        string name)
+        string name,
+        string blobTrigger)
     {
         using var blobStreamReader = new StreamReader(stream);
         var content = await blobStreamReader.ReadToEndAsync();
 
-        _logger.LogInformation($"C# Blob trigger function Processed blob \n Name: {name}\n Content: {content}");
+        _logger.LogInformation($"C# Blob trigger function Processed blob \n Name: {name}\n Content: {content}\n Path: {blobTrigger}");
     }
 }
