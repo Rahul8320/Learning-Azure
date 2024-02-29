@@ -74,6 +74,33 @@ public class CosmosDbTriggerFunction(ILoggerFactory loggerFactory)
             throw;
         }
     }
+
+    [Function("CosmosDbOutPutBinding")]
+    [CosmosDBOutput("TestDB", "TodoItems", Connection = "CosmosDBConnection", CreateIfNotExists = true, PartitionKey = "/id")]
+    public async Task<object> CosmosDbOutPutBinding([HttpTrigger(AuthorizationLevel.Function, "post", Route = "create-new-todo")] HttpRequest req)
+    {
+        try
+        {
+            _logger.LogInformation("CosmosDbOutPutBinding processed a request");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+
+            var todoItem = new ToDoItem()
+            {
+                Id = Guid.NewGuid(),
+                Description = data.description,
+                LastUpdated = DateTime.UtcNow,
+            };
+            var partitionKey = new PartitionKey(todoItem.Id.ToString());
+
+            return new { todoItem, partitionKey };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
 
 public class ToDoItem
